@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce Agentforce — Developer Learning Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1424;
+    --bg3: #141929;
+    --card: #161c2e;
+    --card2: #1c2340;
+    --border: #1e2a45;
+    --border2: #253050;
+    --sf-blue: #00A1E0;
+    --sf-blue2: #0d7bbf;
+    --sf-cyan: #06b6d4;
+    --sf-purple: #7c3aed;
+    --sf-green: #10b981;
+    --sf-amber: #f59e0b;
+    --sf-red: #ef4444;
+    --sf-pink: #ec4899;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ─── HERO ─────────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, #0a0e1a 0%, #0f1a35 50%, #0a1628 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,161,224,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 200px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,161,224,0.1); border: 1px solid rgba(0,161,224,0.25);
+    color: var(--sf-blue); font-size: 12px; font-weight: 600;
+    padding: 5px 14px; border-radius: 20px; letter-spacing: 0.05em;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--sf-blue); display: inline-block; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .hero h1 { font-size: 42px; font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
+  .hero h1 em { font-style: normal; color: var(--sf-blue); }
+  .hero p { font-size: 17px; color: var(--text2); max-width: 620px; margin-bottom: 28px; }
+  .hero-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .hero-meta span { font-size: 13px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+  .hero-meta span b { color: var(--text2); font-weight: 500; }
+
+  /* ─── NAV ───────────────────────────────────── */
+  .nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto; }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav a {
+    display: block; padding: 14px 16px;
+    font-size: 13px; font-weight: 500; color: var(--text3);
+    text-decoration: none; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav a:hover { color: var(--text); }
+  .nav a.active { color: var(--sf-blue); border-bottom-color: var(--sf-blue); }
+
+  /* ─── LAYOUT ────────────────────────────────── */
+  .main { max-width: 900px; margin: 0 auto; padding: 48px 40px; }
+
+  /* ─── SECTIONS ──────────────────────────────── */
+  .section { margin-bottom: 64px; }
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--sf-blue);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section h2 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .section > p { color: var(--text2); margin-bottom: 28px; font-size: 15px; }
+
+  /* ─── CARDS ─────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .card p { color: var(--text2); font-size: 14px; line-height: 1.7; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:640px){ .card-grid { grid-template-columns: 1fr; } }
+
+  /* ─── TAGS ──────────────────────────────────── */
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 0.03em;
+  }
+  .tag-blue { background: rgba(0,161,224,0.12); color: var(--sf-blue); }
+  .tag-purple { background: rgba(124,58,237,0.12); color: #a78bfa; }
+  .tag-green { background: rgba(16,185,129,0.12); color: var(--sf-green); }
+  .tag-amber { background: rgba(245,158,11,0.12); color: var(--sf-amber); }
+  .tag-red { background: rgba(239,68,68,0.12); color: var(--sf-red); }
+  .tag-cyan { background: rgba(6,182,212,0.12); color: var(--sf-cyan); }
+  .tag-pink { background: rgba(236,72,153,0.12); color: var(--sf-pink); }
+
+  /* ─── TERM BLOCKS ───────────────────────────── */
+  .term {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--sf-blue);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  .term-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .term h4 { font-size: 15px; font-weight: 600; }
+  .term p { color: var(--text2); font-size: 14px; }
+  .term.green { border-left-color: var(--sf-green); }
+  .term.purple { border-left-color: #7c3aed; }
+  .term.amber { border-left-color: var(--sf-amber); }
+  .term.cyan { border-left-color: var(--sf-cyan); }
+  .term.pink { border-left-color: var(--sf-pink); }
+  .term.red { border-left-color: var(--sf-red); }
+
+  /* ─── CODE BLOCKS ───────────────────────────── */
+  .code-block {
+    background: #080c18;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    margin: 16px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block .code-lang {
+    position: absolute; top: 10px; right: 14px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .code-block pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: #e2e8f0;
+    white-space: pre;
+  }
+  .kw { color: #7c3aed; }
+  .fn { color: #06b6d4; }
+  .str { color: #10b981; }
+  .cm { color: #475569; font-style: italic; }
+  .num { color: #f59e0b; }
+  .cls { color: #f472b6; }
+
+  /* ─── FLOW DIAGRAM ──────────────────────────── */
+  .flow {
+    display: flex; align-items: center; gap: 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    overflow-x: auto; margin: 20px 0;
+    flex-wrap: nowrap;
+  }
+  .flow-step {
+    text-align: center; flex-shrink: 0;
+    min-width: 110px;
+  }
+  .flow-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin: 0 auto 8px;
+  }
+  .flow-step p { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .flow-step span { font-size: 11px; color: var(--text3); }
+  .flow-arrow { color: var(--text3); font-size: 18px; padding: 0 4px; flex-shrink: 0; margin-bottom: 18px; }
+
+  /* ─── EXAMPLE BOX ───────────────────────────── */
+  .example {
+    background: rgba(16,185,129,0.05);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+  .example-label { font-size: 11px; font-weight: 700; color: var(--sf-green); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .example p { font-size: 14px; color: var(--text2); }
+  .example code { font-family: var(--mono); font-size: 13px; color: var(--sf-cyan); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; }
+
+  /* ─── WARNING BOX ───────────────────────────── */
+  .warn {
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 16px 0;
+  }
+  .warn-label { font-size: 11px; font-weight: 700; color: var(--sf-amber); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .warn p { font-size: 14px; color: var(--text2); }
+
+  /* ─── INFO BOX ──────────────────────────────── */
+  .info {
+    background: rgba(0,161,224,0.05);
+    border: 1px solid rgba(0,161,224,0.2);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 16px 0;
+  }
+  .info-label { font-size: 11px; font-weight: 700; color: var(--sf-blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .info p { font-size: 14px; color: var(--text2); }
+
+  /* ─── TABLE ─────────────────────────────────── */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--card2); color: var(--text); font-weight: 600; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border2); font-size: 13px; }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ─── LIST ──────────────────────────────────── */
+  .steps { list-style: none; counter-reset: steps; }
+  .steps li {
+    counter-increment: steps;
+    padding: 14px 16px 14px 52px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px; color: var(--text2);
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li::before {
+    content: counter(steps);
+    position: absolute; left: 16px; top: 14px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(0,161,224,0.15); color: var(--sf-blue);
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 14px; }
+
+  /* ─── COMPARE ───────────────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  @media(max-width:580px){ .compare { grid-template-columns: 1fr; } }
+  .compare-col { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px; }
+  .compare-col h5 { font-size: 13px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .compare-col ul { list-style: none; }
+  .compare-col li { font-size: 13px; color: var(--text2); padding: 5px 0; padding-left: 18px; position: relative; }
+  .compare-col li::before { content: '→'; position: absolute; left: 0; color: var(--text3); }
+
+  /* ─── ACCORDION ─────────────────────────────── */
+  details { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; }
+  summary { padding: 16px 20px; font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; font-size: 18px; color: var(--text3); font-weight: 300; transition: transform 0.2s; }
+  details[open] summary::after { content: '−'; }
+  details > div { padding: 0 20px 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+  details > div p { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+
+  /* ─── PROGRESS PATH ─────────────────────────── */
+  .path { position: relative; padding-left: 32px; }
+  .path::before { content: ''; position: absolute; left: 11px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+  .path-item { position: relative; margin-bottom: 24px; }
+  .path-dot { position: absolute; left: -32px; top: 4px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .path-dot.blue { border-color: var(--sf-blue); color: var(--sf-blue); background: rgba(0,161,224,0.1); }
+  .path-dot.green { border-color: var(--sf-green); color: var(--sf-green); background: rgba(16,185,129,0.1); }
+  .path-dot.purple { border-color: #7c3aed; color: #a78bfa; background: rgba(124,58,237,0.1); }
+  .path-dot.amber { border-color: var(--sf-amber); color: var(--sf-amber); background: rgba(245,158,11,0.1); }
+  .path-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .path-item p { font-size: 13px; color: var(--text2); }
+
+  /* ─── FOOTER ────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 40px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+  footer a { color: var(--sf-blue); text-decoration: none; }
+
+  /* scroll smooth */
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span></span> Developer Reference Guide</div>
+    <h1>Salesforce <em>Agentforce</em><br>Deep Dive</h1>
+    <p>Core concepts, terminology, architecture patterns, and real code examples — built for developers targeting production deployments and Agentblazer Legend.</p>
+    <div class="hero-meta">
+      <span>⚡ <b>Level:</b> Intermediate → Advanced</span>
+      <span>🧩 <b>Topics:</b> 8 core modules</span>
+      <span>💻 <b>Examples:</b> Flow, Apex, Prompt templates</span>
+      <span>📅 <b>Updated:</b> 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#what-is" class="active">What is Agentforce</a>
+    <a href="#atlas">Atlas Engine</a>
+    <a href="#terminology">Terminology</a>
+    <a href="#building-blocks">Building Blocks</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#examples">Code Examples</a>
+    <a href="#hallucinations">Anti-Hallucination</a>
+    <a href="#patterns">Patterns</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ─── SECTION 1: WHAT IS AGENTFORCE ─── -->
+  <section class="section" id="what-is">
+    <div class="section-label">Module 01</div>
+    <h2>What is Agentforce?</h2>
+    <p>Agentforce is Salesforce's platform for building and deploying autonomous AI agents that reason, plan, and act — end to end — without constant human intervention.</p>
+
+    <div class="compare">
+      <div class="compare-col">
+        <h5 style="color:#ef4444">❌ Traditional Chatbot</h5>
+        <ul>
+          <li>Scripted, rule-based responses</li>
+          <li>Pattern matching only</li>
+          <li>Can't take real actions</li>
+          <li>Single-turn, no memory</li>
+          <li>Breaks outside the script</li>
+          <li>No planning capability</li>
+        </ul>
+      </div>
+      <div class="compare-col">
+        <h5 style="color:#10b981">✅ Agentforce Agent</h5>
+        <ul>
+          <li>Understands real intent</li>
+          <li>Plans multi-step tasks</li>
+          <li>Executes Flows, APIs, Apex</li>
+          <li>Multi-turn with full context</li>
+          <li>Handles ambiguity gracefully</li>
+          <li>Learns from outcomes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="info-label">💡 Key Insight</div>
+      <p>Agentforce agents are not prompt wrappers. They are <strong>autonomous systems</strong> that use the Atlas Reasoning Engine to break down requests, plan subtasks, fetch data, execute actions, and validate outputs — all within guardrails you define.</p>
+    </div>
+
+    <div class="card-grid" style="margin-top:20px">
+      <div class="card">
+        <h3><span class="tag tag-blue">Service</span></h3>
+        <p>Handle customer support cases, order lookups, escalations, and knowledge base search autonomously — 24/7 without human agents.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-green">Sales SDR</span></h3>
+        <p>Qualify leads, schedule meetings, update CRM records, and send personalized outreach — grounded in your real pipeline data.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-purple">Marketing</span></h3>
+        <p>Generate personalized content, segment audiences from Data Cloud, and trigger journey actions based on behavioral signals.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-amber">Internal Ops</span></h3>
+        <p>Automate HR queries, IT service requests, finance approvals, and internal knowledge retrieval across the enterprise.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 2: ATLAS ENGINE ─── -->
+  <section class="section" id="atlas">
+    <div class="section-label">Module 02</div>
+    <h2>Atlas Reasoning Engine</h2>
+    <p>Atlas is the AI brain powering every Agentforce agent. It implements "System 2" reasoning — deliberate, multi-step thinking — instead of instant pattern-matching.</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(0,161,224,0.12)">🎯</div>
+        <p>Intent Parse</p>
+        <span>Understand real goal</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(124,58,237,0.12)">🗂️</div>
+        <p>Topic Match</p>
+        <span>Find right subagent</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(16,185,129,0.12)">🧠</div>
+        <p>Plan</p>
+        <span>Break into subtasks</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(6,182,212,0.12)">📦</div>
+        <p>Ground Data</p>
+        <span>Fetch CRM + DC</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(245,158,11,0.12)">⚡</div>
+        <p>Execute</p>
+        <span>Run actions</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(239,68,68,0.12)">🛡️</div>
+        <p>Guardrail</p>
+        <span>Validate output</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(16,185,129,0.12)">✅</div>
+        <p>Respond</p>
+        <span>Send to user</span>
+      </div>
+    </div>
+
+    <div class="term">
+      <div class="term-head"><h4>System 2 Reasoning</h4><span class="tag tag-blue">Core Concept</span></div>
+      <p>Borrowed from cognitive psychology. System 1 = fast, instinctive (traditional bots). System 2 = slow, deliberate, logical. Atlas uses System 2 — it pauses, evaluates context, considers options, and plans before acting. This is why it handles edge cases that scripted bots fail on.</p>
+    </div>
+
+    <div class="warn">
+      <div class="warn-label">⚠️ Interview Trap</div>
+      <p>MCP (Model Context Protocol) is <strong>not</strong> where reasoning happens. MCP is the integration layer for connecting external tools. Atlas does the reasoning. Don't confuse the two in interviews.</p>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 3: TERMINOLOGY ─── -->
+  <section class="section" id="terminology">
+    <div class="section-label">Module 03</div>
+    <h2>Core Terminology</h2>
+    <p>Every term you must know cold for developer interviews and Agentblazer Legend certification.</p>
+
+    <div class="term">
+      <div class="term-head"><h4>Agent</h4><span class="tag tag-blue">Foundation</span></div>
+      <p>A configured AI system in Agentforce that has a defined persona, set of topics, actions, and guardrails. An agent receives user input, reasons through it using Atlas, and produces outputs by executing actions. Think of it as an autonomous digital employee with a specific job role.</p>
+    </div>
+
+    <div class="term green">
+      <div class="term-head"><h4>Topic</h4><span class="tag tag-green">Building Block</span></div>
+      <p>A scoped domain of behavior within an agent. Each topic has a <strong>classification description</strong> (tells Atlas when to activate it), a <strong>scope</strong> (what the agent can do in this topic), and a set of actions. Example: an e-commerce agent might have topics for "Order Management", "Returns", and "Product Queries".</p>
+    </div>
+
+    <div class="term purple">
+      <div class="term-head"><h4>Action</h4><span class="tag tag-purple">Building Block</span></div>
+      <p>A specific task the agent can execute. Actions are registered tools — they can be Salesforce Flows, Apex classes, API callouts, prompt templates, or even other agents. Actions have input/output parameters that Atlas uses to pass data through the execution chain.</p>
+    </div>
+
+    <div class="term amber">
+      <div class="term-head"><h4>Instructions</h4><span class="tag tag-amber">Building Block</span></div>
+      <p>Natural language directives that shape agent behavior within a topic. Instructions define: the agent's persona, communication tone, what it can/cannot say, when to ask clarifying questions, and when to escalate. Well-written instructions are the difference between a reliable agent and a hallucinating one.</p>
+    </div>
+
+    <div class="term cyan">
+      <div class="term-head"><h4>Guardrails</h4><span class="tag tag-cyan">Safety</span></div>
+      <p>Runtime validation rules applied before a response is sent. Guardrails prevent the agent from: going out of scope, revealing sensitive data, taking destructive actions, or responding when it has insufficient grounded data. They run on every turn, not just at setup.</p>
+    </div>
+
+    <div class="term pink">
+      <div class="term-head"><h4>Subagent</h4><span class="tag tag-pink">Orchestration</span></div>
+      <p>A focused agent invoked by an orchestrator agent to handle a specialized domain. Subagents encapsulate their own topics, actions, and instructions. They accept context from the orchestrator, execute their task, and return structured output. This is the foundation of multi-agent architecture.</p>
+    </div>
+
+    <div class="term red">
+      <div class="term-head"><h4>Agentforce Script</h4><span class="tag tag-red">Advanced</span></div>
+      <p>A unified text-based language that expresses the entire behavior of an agent in one file — configuration, business logic, actions, and reasoning instructions. It blends natural language with deterministic rules, enabling hybrid reasoning that's both flexible and predictable.</p>
+    </div>
+
+    <div class="term">
+      <div class="term-head"><h4>Data Cloud / Data 360</h4><span class="tag tag-blue">Data Layer</span></div>
+      <p>The data virtualization layer that provides individualized context to agents. Agents query Data Cloud to ground their responses in real CRM records, customer profiles, order history, and unstructured assets (emails, PDFs, knowledge articles). Without Data Cloud grounding, agents hallucinate.</p>
+    </div>
+
+    <div class="term green">
+      <div class="term-head"><h4>Model Context Protocol (MCP)</h4><span class="tag tag-green">Integration</span></div>
+      <p>A universal integration standard (like a USB-C port for AI) that allows agents to securely connect to external tools, files, databases, and APIs without custom integration code. Salesforce shipped 60+ MCP tools in Spring '26. MCP is the transport layer; Atlas is the reasoning layer.</p>
+    </div>
+
+    <div class="term purple">
+      <div class="term-head"><h4>Prompt Template</h4><span class="tag tag-purple">AI Layer</span></div>
+      <p>A structured template used to inject CRM data, user context, and instructions into the LLM call. Prompt templates are configured in Prompt Builder and registered as actions. They control exactly what information is sent to the model and in what format — critical for grounding and accuracy.</p>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:24px">
+      <table>
+        <thead>
+          <tr><th>Term</th><th>Where configured</th><th>Who owns it</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Agent</td><td>Agent Builder</td><td>Admin / Developer</td></tr>
+          <tr><td>Topic</td><td>Agent Builder → Topics tab</td><td>Admin / Developer</td></tr>
+          <tr><td>Action (Flow)</td><td>Flow Builder → registered in Agent Builder</td><td>Developer</td></tr>
+          <tr><td>Action (Apex)</td><td>Apex class with <code>@InvocableMethod</code></td><td>Developer</td></tr>
+          <tr><td>Instructions</td><td>Agent Builder → topic instructions</td><td>Admin / Architect</td></tr>
+          <tr><td>Guardrails</td><td>Agent Builder → Guardrails tab</td><td>Architect / Admin</td></tr>
+          <tr><td>Prompt Template</td><td>Prompt Builder</td><td>Developer / AI Specialist</td></tr>
+          <tr><td>Data Cloud</td><td>Data Cloud setup → Data Spaces</td><td>Data Engineer</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 4: BUILDING BLOCKS ─── -->
+  <section class="section" id="building-blocks">
+    <div class="section-label">Module 04</div>
+    <h2>Building Blocks Deep Dive</h2>
+    <p>How Topics, Actions, and Instructions actually work together in Agent Builder — with real configuration examples.</p>
+
+    <h3 style="font-size:18px;margin-bottom:16px;margin-top:8px">Topics — the right way to configure them</h3>
+
+    <div class="example">
+      <div class="example-label">✅ Good topic classification description</div>
+      <p>"Use this topic when a customer asks to cancel, modify, or check the status of an existing order. Activate when the conversation contains order numbers, cancellation requests, or delivery inquiries."</p>
+    </div>
+    <div class="warn">
+      <div class="warn-label">❌ Bad topic classification description</div>
+      <p>"Handle order things." — Too vague. Atlas will misroute or activate this topic incorrectly, causing wrong actions to fire on unrelated queries.</p>
+    </div>
+
+    <h3 style="font-size:18px;margin-bottom:16px;margin-top:28px">Actions — three types you must know</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h3><span class="tag tag-green">Flow Action</span></h3>
+        <p>Autolaunched Flows registered in Agent Builder. Best for: data lookups, record updates, multi-step logic with decisions. Input/output variables become the action's parameters.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-purple">Apex Action</span></h3>
+        <p>Apex methods annotated with <code style="color:var(--sf-cyan);font-family:var(--mono);font-size:12px">@InvocableMethod</code>. Best for: complex logic, external API callouts, transactional operations needing try-catch and rollback.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-blue">Prompt Action</span></h3>
+        <p>Prompt templates from Prompt Builder. Best for: AI-generated summaries, personalized messages, classification tasks where you need the LLM to produce structured output.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-amber">Agent Action</span></h3>
+        <p>Calling another agent as an action. This is the foundation of multi-agent orchestration. The called agent returns structured output consumed by the orchestrator.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px;margin-bottom:16px;margin-top:28px">Instructions — what to write</h3>
+    <div class="card" style="background:#080c18;border-color:var(--border2)">
+      <p style="font-family:var(--mono);font-size:13px;line-height:1.8;color:#e2e8f0">
+        <span style="color:#475569">// Example topic instructions for an Order Cancellation topic</span><br><br>
+        <span style="color:#06b6d4">You are an order management specialist for Acme Corp.</span><br><br>
+        <span style="color:#10b981">Always:</span><br>
+        - Collect the order number from the customer if not provided<br>
+        - Verify eligibility before cancelling (within 24h, status = Processing)<br>
+        - Confirm the cancellation with the customer before executing<br>
+        - Provide a cancellation reference number after success<br><br>
+        <span style="color:#ef4444">Never:</span><br>
+        - Cancel orders that are already shipped or delivered<br>
+        - Reveal internal order IDs or database record IDs<br>
+        - Process refunds in this topic (use the Billing topic)<br><br>
+        <span style="color:#f59e0b">If eligibility check fails:</span><br>
+        - Explain why the order cannot be cancelled<br>
+        - Offer to connect the customer with a human specialist<br>
+        - Use the escalation action to transfer to Omni-Channel queue
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 5: ARCHITECTURE ─── -->
+  <section class="section" id="architecture">
+    <div class="section-label">Module 05</div>
+    <h2>Architecture Patterns</h2>
+    <p>Real architectural patterns used in enterprise Agentforce deployments.</p>
+
+    <h3 style="font-size:18px;margin:8px 0 16px">Pattern 1 — Single Agent (standard)</h3>
+    <div class="card">
+      <p style="color:var(--text2);font-size:14px">One agent handles all topics for a single domain. Topics route internally. Best for: focused use cases like a customer service agent for a single product line. Easiest to build and maintain.</p>
+      <div style="margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--text3)">
+        User → [Service Agent] → Topic Match → Action → Response
+      </div>
+    </div>
+
+    <h3 style="font-size:18px;margin:24px 0 16px">Pattern 2 — Orchestrator + Specialists</h3>
+    <div class="card">
+      <p style="color:var(--text2);font-size:14px">An orchestrator agent receives all incoming requests, identifies intent, and delegates to specialist subagents. The orchestrator owns the conversation thread and assembles the final response. This is the enterprise pattern.</p>
+      <div style="margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--text2);line-height:2">
+        <span style="color:var(--sf-blue)">User</span> → <span style="color:var(--sf-cyan)">[Orchestrator Agent]</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:var(--sf-green)">[Service Agent]</span> → handles support queries<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:var(--sf-amber)">[Order Agent]</span>&nbsp;&nbsp;→ handles order ops<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:var(--sf-pink)">[Billing Agent]</span> → handles payments<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+        <span style="color:var(--sf-blue)">Unified response → User</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px;margin:24px 0 16px">Pattern 3 — Proactive / Headless Agent</h3>
+    <div class="card">
+      <p style="color:var(--text2);font-size:14px">Agent runs without user initiation. Triggered by a Platform Event, scheduled job, or data change. Example: a lead research agent that automatically qualifies new leads when they're created in Salesforce, then updates the record and notifies the sales rep.</p>
+      <div style="margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--text3)">
+        Platform Event → [Headless Agent] → Data lookup → Action → CRM Update
+      </div>
+    </div>
+
+    <div class="info" style="margin-top:20px">
+      <div class="info-label">🏗️ Architecture Decision</div>
+      <p>Use the <strong>Orchestrator pattern</strong> when: a single conversation may span multiple domains. Use <strong>single agent</strong> when: the use case is domain-specific and unlikely to need cross-domain reasoning. Use <strong>headless</strong> when: the agent needs to act on data events without user interaction.</p>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 6: CODE EXAMPLES ─── -->
+  <section class="section" id="examples">
+    <div class="section-label">Module 06</div>
+    <h2>Code Examples</h2>
+    <p>Real Apex and Flow patterns you'll build in production Agentforce deployments.</p>
+
+    <h3 style="font-size:17px;margin-bottom:12px">Example 1 — Apex Action for Order Eligibility Check</h3>
+    <div class="code-block">
+      <div class="code-lang">Apex</div>
+      <pre><span class="kw">public class</span> <span class="cls">OrderCancellationAction</span> {
+
+    <span class="kw">public class</span> <span class="cls">OrderInput</span> {
+        <span class="fn">@InvocableVariable</span>(label=<span class="str">'Order Number'</span> required=<span class="kw">true</span>)
+        <span class="kw">public</span> String orderNumber;
+    }
+
+    <span class="kw">public class</span> <span class="cls">OrderResult</span> {
+        <span class="fn">@InvocableVariable</span>(label=<span class="str">'Is Eligible'</span>)
+        <span class="kw">public</span> Boolean isEligible;
+
+        <span class="fn">@InvocableVariable</span>(label=<span class="str">'Order Id'</span>)
+        <span class="kw">public</span> String orderId;
+
+        <span class="fn">@InvocableVariable</span>(label=<span class="str">'Reason'</span>)
+        <span class="kw">public</span> String reason;
+    }
+
+    <span class="fn">@InvocableMethod</span>(
+        label=<span class="str">'Check Order Cancellation Eligibility'</span>
+        description=<span class="str">'Returns eligibility status and reason for cancellation request'</span>
+    )
+    <span class="kw">public static</span> List&lt;<span class="cls">OrderResult</span>&gt; checkEligibility(
+        List&lt;<span class="cls">OrderInput</span>&gt; inputs
+    ) {
+        List&lt;<span class="cls">OrderResult</span>&gt; results = <span class="kw">new</span> List&lt;<span class="cls">OrderResult</span>&gt;();
+
+        <span class="kw">for</span> (<span class="cls">OrderInput</span> inp : inputs) {
+            <span class="cls">OrderResult</span> result = <span class="kw">new</span> <span class="cls">OrderResult</span>();
+
+            <span class="cm">// Query order record</span>
+            List&lt;Order&gt; orders = [
+                <span class="kw">SELECT</span> Id, Status, CreatedDate
+                <span class="kw">FROM</span> Order
+                <span class="kw">WHERE</span> OrderNumber = :inp.orderNumber
+                <span class="kw">LIMIT</span> <span class="num">1</span>
+            ];
+
+            <span class="kw">if</span> (orders.isEmpty()) {
+                result.isEligible = <span class="kw">false</span>;
+                result.reason = <span class="str">'Order not found'</span>;
+            } <span class="kw">else</span> {
+                Order ord = orders[<span class="num">0</span>];
+                Boolean within24h = ord.CreatedDate >= System.now().addHours(-<span class="num">24</span>);
+                Boolean isProcessing = ord.Status == <span class="str">'Processing'</span>;
+
+                result.isEligible = within24h && isProcessing;
+                result.orderId = ord.Id;
+                result.reason = !within24h
+                    ? <span class="str">'Order is older than 24 hours'</span>
+                    : !isProcessing
+                    ? <span class="str">'Order status is not Processing'</span>
+                    : <span class="str">'Eligible for cancellation'</span>;
+            }
+            results.add(result);
+        }
+        <span class="kw">return</span> results;
+    }
+}</pre>
+    </div>
+
+    <h3 style="font-size:17px;margin:28px 0 12px">Example 2 — Prompt Template for Case Summary</h3>
+    <div class="code-block">
+      <div class="code-lang">Prompt Template</div>
+      <pre><span class="cm">// Prompt Builder — Flex Template</span>
+<span class="cm">// Used as an action to summarize a case before agent response</span>
+
+<span class="fn">System:</span>
+<span class="str">You are a Salesforce service expert. Summarize the case below
+in 2-3 sentences. Focus on: what the customer reported, current
+status, and next recommended action. Be factual and concise.
+If information is missing, say "Not available" — do not invent.</span>
+
+<span class="fn">Context:</span>
+Case Number: <span class="cls">{!$Input:Case.CaseNumber}</span>
+Subject: <span class="cls">{!$Input:Case.Subject}</span>
+Description: <span class="cls">{!$Input:Case.Description}</span>
+Status: <span class="cls">{!$Input:Case.Status}</span>
+Priority: <span class="cls">{!$Input:Case.Priority}</span>
+Last Activity: <span class="cls">{!$Input:Case.LastActivityDate}</span>
+
+<span class="fn">User:</span>
+<span class="str">Summarize this case for the service agent.</span></pre>
+    </div>
+
+    <h3 style="font-size:17px;margin:28px 0 12px">Example 3 — Multi-Agent Orchestrator Instructions</h3>
+    <div class="code-block">
+      <div class="code-lang">Agent Instructions</div>
+      <pre><span class="cm">// Orchestrator Agent — Topic: Route Customer Request</span>
+
+<span class="str">You are the primary customer assistant for Acme Corp.</span>
+<span class="str">Your job is to understand what the customer needs and route</span>
+<span class="str">to the right specialist agent.</span>
+
+<span class="fn">Routing Rules:</span>
+- Order cancellations, status, modifications → <span class="cls">invoke Order Agent</span>
+- Billing disputes, refunds, payments       → <span class="cls">invoke Billing Agent</span>
+- Product questions, returns, warranties    → <span class="cls">invoke Service Agent</span>
+- Requests touching 2+ domains             → <span class="cls">invoke sequentially</span>
+  (complete first domain before invoking second)
+
+<span class="fn">On failure from a subagent:</span>
+- Log the failure context
+- Inform the customer the action could not be completed
+- <span class="cls">Invoke escalation action</span> to transfer to human queue
+
+<span class="fn">Always:</span>
+- Collect full customer context before routing
+- Pass conversation history to every subagent invocation
+- Assemble ONE unified response from all subagent outputs
+- Never expose internal agent names or routing logic to customer</pre>
+    </div>
+
+    <h3 style="font-size:17px;margin:28px 0 12px">Example 4 — Apex with try-catch for transactional safety</h3>
+    <div class="code-block">
+      <div class="code-lang">Apex</div>
+      <pre><span class="fn">@InvocableMethod</span>(label=<span class="str">'Process Refund'</span>)
+<span class="kw">public static</span> List&lt;String&gt; processRefund(List&lt;String&gt; orderIds) {
+    List&lt;String&gt; results = <span class="kw">new</span> List&lt;String&gt;();
+
+    <span class="kw">for</span> (String orderId : orderIds) {
+        Savepoint sp = Database.setSavepoint();
+        <span class="kw">try</span> {
+            <span class="cm">// 1. Update order status</span>
+            Order ord = [<span class="kw">SELECT</span> Id, Status <span class="kw">FROM</span> Order <span class="kw">WHERE</span> Id = :orderId];
+            ord.Status = <span class="str">'Refund Initiated'</span>;
+            update ord;
+
+            <span class="cm">// 2. Call external payment API</span>
+            HttpResponse res = RefundAPIService.initiateRefund(orderId);
+            <span class="kw">if</span> (res.getStatusCode() != <span class="num">200</span>) {
+                <span class="kw">throw new</span> CalloutException(<span class="str">'Payment API failed: '</span> + res.getBody());
+            }
+
+            results.add(<span class="str">'SUCCESS:Refund initiated for order '</span> + orderId);
+
+        } <span class="kw">catch</span> (Exception e) {
+            <span class="cm">// Rollback ALL changes if anything fails</span>
+            Database.rollback(sp);
+            results.add(<span class="str">'ERROR:'</span> + e.getMessage());
+        }
+    }
+    <span class="kw">return</span> results;
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 7: ANTI-HALLUCINATION ─── -->
+  <section class="section" id="hallucinations">
+    <div class="section-label">Module 07</div>
+    <h2>Anti-Hallucination Techniques</h2>
+    <p>The #1 production issue with Agentforce. Here are the root causes and specific fixes.</p>
+
+    <details>
+      <summary>Root Cause 1 — No data grounding</summary>
+      <div>
+        <p>The agent answers from the LLM's general knowledge instead of your actual business data. This is the most common cause.</p>
+        <p><strong style="color:var(--sf-green)">Fix:</strong> Connect Data Cloud. Use vector search (RAG) to retrieve relevant records before generating a response. Add to instructions: <em>"Only answer based on the data provided. If the answer is not in the retrieved context, say you don't know."</em></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Root Cause 2 — Weak prompt templates</summary>
+      <div>
+        <p>Vague instructions give the LLM room to fill gaps with invented content. Prompts that don't constrain the output format or data sources allow hallucination.</p>
+        <p><strong style="color:var(--sf-green)">Fix:</strong> Add explicit constraints in every prompt template: specify the output format, the data source to use, and what to do when data is absent. Use Agentforce Script for deterministic, rule-based instructions alongside natural language.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Root Cause 3 — Stale knowledge base</summary>
+      <div>
+        <p>Outdated knowledge articles return wrong information confidently. Agents have no way to know an article is outdated without explicit metadata.</p>
+        <p><strong style="color:var(--sf-green)">Fix:</strong> Audit your knowledge base regularly. Set <code style="color:var(--sf-cyan);font-family:var(--mono);font-size:12px">PublishStatus</code> and <code style="color:var(--sf-cyan);font-family:var(--mono);font-size:12px">LastModifiedDate</code> filters in your Data Cloud ingestion to exclude articles older than a defined threshold. Scope the agent's knowledge search to relevant article categories only.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Root Cause 4 — No fallback instruction</summary>
+      <div>
+        <p>When the agent finds no grounded data, it defaults to generating something plausible-sounding but wrong.</p>
+        <p><strong style="color:var(--sf-green)">Fix:</strong> Explicitly write in your topic instructions: <em>"If you cannot find the answer in the available data, respond with: 'I don't have that information right now. Let me connect you with a specialist.' Then invoke the escalation action."</em></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Root Cause 5 — Wrong context passed to LLM</summary>
+      <div>
+        <p>The agent retrieves too much unrelated data (noise) or too little (missing the relevant record), causing the model to either confabulate or miss the answer.</p>
+        <p><strong style="color:var(--sf-green)">Fix:</strong> Tune your Data Cloud vector search query. Use specific filters on data spaces. Limit retrieved chunks to the highest-relevance items. Review the audit trail to see exactly what context was sent to the model on failing turns.</p>
+      </div>
+    </details>
+
+    <div class="info" style="margin-top:20px">
+      <div class="info-label">🔍 How to Diagnose in Production</div>
+      <p>Check the <strong>audit trail</strong> in Data Cloud to see what context was passed to the LLM. Review <strong>agent session logs</strong> to identify which action returned bad data. Use <strong>Agent Builder's conversation preview</strong> to replay the exact failing scenario and inspect Atlas's reasoning steps turn by turn.</p>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 8: PATTERNS ─── -->
+  <section class="section" id="patterns">
+    <div class="section-label">Module 08</div>
+    <h2>Advanced Design Patterns</h2>
+    <p>Patterns used by senior developers and architects in complex Agentforce deployments.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3><span class="tag tag-blue">Judge & Jury</span></h3>
+        <p>When high accuracy is critical (medical, financial, legal), a second LLM call validates the first agent's response against source data before it's sent. One agent generates, another judges. Prevents hallucinations in high-stakes domains.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-green">RAG Pattern</span></h3>
+        <p>Retrieval-Augmented Generation. Before generating a response, retrieve relevant documents from Data Cloud vector search and inject them into the prompt. The agent answers from retrieved facts, not general knowledge.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-purple">Ensemble Approach</span></h3>
+        <p>Built into Atlas. Multiple reasoning paths are evaluated in parallel and the most consistent, relevant output is selected. Reduces variance and improves reliability on ambiguous queries.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-amber">Headless / Proactive</span></h3>
+        <p>Agent triggered by a Platform Event or scheduled job — no user conversation. Reads data, executes business logic, updates records, and sends notifications. Best for background enrichment, qualification, and monitoring use cases.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-cyan">BYO-LLM</span></h3>
+        <p>Bring Your Own Large Language Model. Connect agents to non-Salesforce models (OpenAI, Azure, Anthropic) via Data 360 infrastructure. Useful when a specialized model outperforms the default for a specific domain.</p>
+      </div>
+      <div class="card">
+        <h3><span class="tag tag-pink">BYOL</span></h3>
+        <p>Bring Your Own Lake. Connect agents to data stored in external data lakes (Snowflake, Databricks, AWS S3) via Data 360 federation. Agents can query petabyte-scale data without moving it into Salesforce.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px;margin:32px 0 16px">Agentblazer Legend Learning Path</h3>
+    <div class="card" style="padding:28px">
+      <div class="path">
+        <div class="path-item">
+          <div class="path-dot blue">1</div>
+          <h4>Complete Champion trail</h4>
+          <p>AI fundamentals, Trust Layer, Data Cloud basics, build first agent in guided setup.</p>
+        </div>
+        <div class="path-item">
+          <div class="path-dot green">2</div>
+          <h4>Complete Innovator trail</h4>
+          <p>Business use case identification, Agent Builder, deploy Service and Sales agents, prompt design, AI threat modeling.</p>
+        </div>
+        <div class="path-item">
+          <div class="path-dot purple">3</div>
+          <h4>Complete Legend trail</h4>
+          <p>Data grounding, enterprise architecture, multi-agent orchestration, Apex/Flow customization, Slack deployment, testing and monitoring practices.</p>
+        </div>
+        <div class="path-item">
+          <div class="path-dot amber">4</div>
+          <h4>Earn Agentforce Specialist Certification</h4>
+          <p>The Legend trail culminates in certification prep. Validates your end-to-end Agentforce expertise. Renew annually to keep your 2026 status current.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Salesforce Agentforce Developer Learning Guide • Built for Agentblazer Legend preparation • <a href="https://trailhead.salesforce.com/agentblazer" target="_blank">trailhead.salesforce.com/agentblazer</a></p>
+</footer>
+
+<script>
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`.nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Smooth nav scroll
+  navLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
